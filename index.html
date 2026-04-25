@@ -59,15 +59,16 @@
   /* NAV */
   nav{position:sticky;top:0;z-index:500;display:flex;align-items:center;justify-content:space-between;padding:18px 48px;border-bottom:0.5px solid var(--border);background:rgba(10,10,10,0.95);backdrop-filter:blur(16px)}
   .nav-brand{display:flex;align-items:center;gap:14px}
-  .nav-mark{width:40px;height:40px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-  .nav-mark img{width:100%;height:100%;object-fit:contain}
+  .nav-mark{width:36px;height:36px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:transform .3s ease}
+  .nav-mark img{width:100%;height:100%;object-fit:contain;opacity:0.9;filter:drop-shadow(0 0 8px rgba(255,255,255,0.05))}
+  .nav-brand:hover .nav-mark{transform:scale(1.05)}
   .nav-wordmark{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--white)}
   .nav-wordmark span{color:var(--steel);font-weight:400}
 
   /* HERO BRANDING */
   .hero-logo-wrap{margin-bottom:32px;display:flex;align-items:center;gap:16px;opacity:0;animation:fadeIn 1s ease forwards;animation-delay:0.4s}
-  .hero-logo-mark{width:80px;height:80px;display:flex;align-items:center;justify-content:center}
-  .hero-logo-mark img{width:100%;height:100%;object-fit:contain}
+  .hero-logo-mark{width:72px;height:72px;display:flex;align-items:center;justify-content:center;margin-bottom:8px}
+  .hero-logo-mark img{width:100%;height:100%;object-fit:contain;opacity:0.95;filter:drop-shadow(0 0 15px rgba(255,255,255,0.08))}
   .hero-logo-text{font-family:'Barlow Condensed',sans-serif;font-size:24px;font-weight:800;letter-spacing:0.12em;text-transform:uppercase;color:var(--white);line-height:1}
   .nav-links{display:flex;align-items:center;gap:28px}
   .nav-links a{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--silver);text-decoration:none;transition:color .2s linear}
@@ -239,7 +240,9 @@
   /* FOOTER */
   footer{padding:44px 48px 36px;border-top:0.5px solid var(--border);display:flex;align-items:flex-start;justify-content:space-between;position:relative;z-index:1;background:var(--carbon)}
   .ft-brand{display:flex;flex-direction:column;gap:12px}
-  .ft-brand .logo-mark{width:40px;height:40px;margin-bottom:8px}
+  .ft-brand .logo-mark{width:180px;height:auto;margin-bottom:12px;filter:drop-shadow(0 0 12px rgba(255,255,255,0.1))}
+  .ft-brand .logo-mark img{width:100%;height:auto;opacity:0.85;transition:opacity .3s ease}
+  .ft-brand .logo-mark:hover img{opacity:1}
   .ft-brand .wm{font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--white)}
   .ft-brand .tg{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--steel);letter-spacing:0.08em;margin-top:10px}
   .ft-links{display:flex;gap:44px}
