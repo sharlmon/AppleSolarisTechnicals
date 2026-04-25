@@ -3,417 +3,167 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AppleSolaris Technicals — Precision Diagnostics & Repair</title>
-<link rel="icon" type="image/svg+xml" href="logo_white.svg">
+<title>AppleSolaris Technicals — Precision Tech Repair in Nairobi</title>
+<link rel="icon" type="image/png" href="logo_white.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Barlow+Condensed:wght@700;800&family=Barlow:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Barlow+Condensed:wght@700;800&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   *{margin:0;padding:0;box-sizing:border-box}
   :root{
-    --blk:#1D1D1F;--carbon:#FFFFFF;--charcoal:#FAFAFA;--slate:#F5F5F7;
-    --border:rgba(0,0,0,0.08);--steel:#86868B;--silver:#424245;--offwhite:#1D1D1F;
-    --white:#FFFFFF;--blue:#007AFF;--gold:#FFD60A;--shadow:0 10px 30px rgba(0,0,0,0.04);
+    --carbon:#050505;--charcoal:#0A0A0A;--slate:#121212;
+    --border:rgba(255,255,255,0.08);--silver:#A1A1A6;--offwhite:#F5F5F7;
+    --white:#FFFFFF;--blue:#0A84FF;--shadow:0 20px 60px rgba(0,0,0,0.6);
   }
   html{scroll-behavior:smooth}
-  body{background:var(--white);color:var(--blk);font-family:'Barlow',sans-serif;cursor:none;overflow-x:hidden;line-height:1.6}
-  .mono{font-family:'JetBrains Mono',monospace}
-  .disp{font-family:'Barlow Condensed',sans-serif}
+  body{background:var(--carbon);color:var(--offwhite);font-family:'Barlow',sans-serif;cursor:none;overflow-x:hidden;line-height:1.6}
 
   /* CUSTOM CURSOR */
-  #cur-ring{position:fixed;pointer-events:none;z-index:9999;width:24px;height:24px;border:1px solid rgba(255,255,255,0.5);border-radius:50%;transform:translate(-50%,-50%);transition:width .15s linear,height .15s linear,border-radius .15s linear,border-color .15s linear,background .15s linear}
+  #cur-ring{position:fixed;pointer-events:none;z-index:9999;width:24px;height:24px;border:1px solid rgba(255,255,255,0.5);border-radius:50%;transform:translate(-50%,-50%);transition:width .15s linear,height .15s linear}
   #cur-dot{position:fixed;pointer-events:none;z-index:9999;width:4px;height:4px;background:var(--white);border-radius:50%;transform:translate(-50%,-50%)}
-  #cur-label{position:fixed;pointer-events:none;z-index:9999;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.12em;color:var(--silver);opacity:0;transform:translate(14px,-50%);transition:opacity .15s linear;white-space:nowrap}
-  body.cur-btn #cur-ring{width:10px;height:10px;background:rgba(255,255,255,0.4);border-color:rgba(255,255,255,0.8)}
-  body.cur-cross #cur-ring{width:36px;height:36px;border-radius:0;border-color:rgba(255,255,255,0.35)}
-  body.cur-cross #cur-dot{opacity:0}
-
-  /* PRELOADER */
-  #preloader{position:fixed;inset:0;background:var(--blk);z-index:9000;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity .6s linear}
-  #preloader.out{opacity:0;pointer-events:none}
-  .pre-logo{font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:800;letter-spacing:0.14em;text-transform:uppercase;color:var(--white);opacity:0;margin-bottom:40px;transition:opacity .4s linear}
-  .pre-logo.show{opacity:1}
-  .pre-line{font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:0.1em;color:var(--border);opacity:0;margin:3px 0;transition:color .4s linear,opacity .3s linear;min-width:360px}
-  .pre-line.lit{opacity:1;color:var(--silver)}
-  .pre-line.done{opacity:1;color:var(--offwhite)}
-  .pre-bar-wrap{width:360px;height:1px;background:var(--border);margin-top:28px;overflow:hidden}
-  .pre-bar{height:100%;width:0;background:var(--white);transition:width .2s linear}
-
-  /* AMBIENT LAYER */
-  #ambient{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
-  #grid-c{position:absolute;inset:0;width:100%;height:100%}
-  .scan-line{position:absolute;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent 0%,rgba(255,255,255,0.04) 50%,transparent 100%);animation:scan 9s linear infinite;opacity:0}
-  @keyframes scan{0%{top:-2px;opacity:0}5%{opacity:1}90%{opacity:1}100%{top:100%;opacity:0}}
-  .scan-line:nth-child(3){animation-delay:3s}
-  .scan-line:nth-child(4){animation-delay:6s}
-
-  /* SCROLL RAIL */
-  #rail{position:fixed;right:24px;top:50%;transform:translateY(-50%);z-index:200;display:flex;flex-direction:column;gap:2px;align-items:flex-end}
-  .rail-stage{display:flex;align-items:center;gap:8px;padding:5px 0;cursor:pointer}
-  .rail-line{width:20px;height:0.5px;background:var(--border);transition:width .3s linear,background .3s linear}
-  .rail-label{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.12em;color:var(--border);transition:color .3s linear}
-  .rail-stage.active .rail-line{width:32px;background:var(--silver)}
-  .rail-stage.active .rail-label{color:var(--silver)}
-  .rail-stage.done .rail-line{background:var(--steel)}
-  .rail-stage.done .rail-label{color:var(--steel)}
 
   /* NAV */
-  nav{position:sticky;top:0;z-index:500;display:flex;align-items:center;justify-content:space-between;padding:14px 48px;border-bottom:1px solid var(--border);background:rgba(255,255,255,0.8);backdrop-filter:blur(20px);box-shadow:0 2px 10px rgba(0,0,0,0.02)}
+  nav{position:sticky;top:0;z-index:500;display:flex;align-items:center;justify-content:space-between;padding:14px 48px;border-bottom:1px solid var(--border);background:rgba(5,5,5,0.8);backdrop-filter:blur(20px);box-shadow:0 2px 20px rgba(0,0,0,0.2)}
   .nav-brand{display:flex;align-items:center;gap:12px;text-decoration:none}
-  .nav-mark{width:36px;height:36px;aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;overflow:hidden}
+  .nav-mark{width:36px;height:36px;aspect-ratio:1/1;display:flex;align-items:center;justify-content:center}
   .nav-mark img{width:100%;height:100%;object-fit:contain}
-  .nav-wordmark{font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;color:var(--blk)}
+  .nav-wordmark{font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;color:var(--white)}
   .nav-wordmark span{color:var(--blue)}
+  .nav-links{display:flex;align-items:center;gap:28px}
+  .nav-links a{font-family:'Barlow',sans-serif;font-size:13px;font-weight:500;color:var(--silver);text-decoration:none;transition:color .2s ease}
+  .nav-links a:hover{color:var(--white)}
 
   /* HERO */
-  .hero{min-height:90svh;position:relative;display:flex;align-items:center;justify-content:center;background:var(--slate);overflow:hidden}
-  .hero-bg{position:absolute;inset:0;background-image:url('https://images.unsplash.com/photo-1614018424563-676467ff1482?q=80&w=2069&auto=format&fit=crop');background-size:cover;background-position:center;filter:brightness(0.95)}
-  .hero-card{position:relative;z-index:10;max-width:800px;background:rgba(255,255,255,0.65);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);padding:60px 48px;border-radius:2rem;border:1px solid rgba(255,255,255,0.4);box-shadow:0 25px 50px rgba(0,0,0,0.1);text-align:center;display:flex;flex-direction:column;align-items:center}
-  
+  .hero{min-height:90svh;position:relative;display:flex;align-items:center;justify-content:center;background:var(--carbon);overflow:hidden}
+  .hero-bg{position:absolute;inset:0;background-image:url('https://images.unsplash.com/photo-1591405351990-4726e331f141?q=80&w=2070&auto=format&fit=crop');background-size:cover;background-position:center;opacity:0.25;mix-blend-mode:luminosity}
+  .hero-card{position:relative;z-index:10;max-width:800px;background:rgba(255,255,255,0.03);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);padding:60px 48px;border-radius:2rem;border:1px solid rgba(255,255,255,0.08);box-shadow:var(--shadow);text-align:center;display:flex;flex-direction:column;align-items:center}
   .hero-logo-mark{width:100px;height:100px;aspect-ratio:1/1;margin-bottom:24px}
   .hero-logo-mark img{width:100%;height:100%;object-fit:contain}
-  
-  .eyebrow{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.2em;color:var(--blue);text-transform:uppercase;margin-bottom:20px;display:flex;align-items:center;gap:12px;font-weight:600}
-  
-  h1.hero-head{font-family:'Barlow Condensed',sans-serif;font-size:72px;line-height:1;font-weight:800;letter-spacing:-0.02em;text-transform:uppercase;color:var(--blk);margin-bottom:24px}
+  .eyebrow{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.2em;color:var(--blue);text-transform:uppercase;margin-bottom:20px;font-weight:600}
+  h1.hero-head{font-family:'Barlow Condensed',sans-serif;font-size:72px;line-height:1;font-weight:800;letter-spacing:-0.02em;text-transform:uppercase;color:var(--white);margin-bottom:24px}
   h1.hero-head span{color:var(--blue)}
-  
   .hero-sub{font-size:19px;color:var(--silver);line-height:1.6;max-width:600px;margin-bottom:36px}
   .hero-actions{display:flex;align-items:center;gap:16px;justify-content:center}
-  
-  .btn-p{font-family:'Barlow',sans-serif;font-size:14px;font-weight:600;letter-spacing:0.02em;color:white;background:var(--blue);border:none;padding:16px 32px;border-radius:1rem;cursor:none;transition:all .3s ease;box-shadow:0 4px 15px rgba(0,122,255,0.3)}
-  .btn-p:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,122,255,0.4)}
-  
-  .btn-g{font-family:'Barlow',sans-serif;font-size:14px;font-weight:600;letter-spacing:0.02em;color:var(--blk);background:rgba(255,255,255,0.8);border:1px solid var(--border);padding:16px 32px;border-radius:1rem;cursor:none;transition:all .3s ease}
-  .btn-g:hover{background:white;transform:translateY(-2px);box-shadow:var(--shadow)}
+  .btn-p{font-family:'Barlow',sans-serif;font-size:14px;font-weight:600;letter-spacing:0.02em;color:white;background:var(--blue);border:none;padding:16px 32px;border-radius:1rem;cursor:none;transition:all .3s ease;box-shadow:0 8px 20px rgba(10,132,255,0.3);text-decoration:none}
+  .btn-p:hover{transform:translateY(-2px);box-shadow:0 12px 25px rgba(10,132,255,0.4)}
+  .btn-g{font-family:'Barlow',sans-serif;font-size:14px;font-weight:600;letter-spacing:0.02em;color:var(--white);background:rgba(255,255,255,0.05);border:1px solid var(--border);padding:16px 32px;border-radius:1rem;cursor:none;transition:all .3s ease;text-decoration:none}
+  .btn-g:hover{background:rgba(255,255,255,0.1);transform:translateY(-2px)}
 
-  /* HERO RIGHT */
-  .hero-right{background:var(--charcoal);display:flex;flex-direction:column;position:relative;z-index:2}
-  #mb-canvas{flex:1;position:relative;overflow:hidden;min-height:300px}
-  #mb-svg{width:100%;height:100%}
-  .hero-stats{display:grid;grid-template-columns:1fr 1fr;border-top:0.5px solid var(--border);background:rgba(0,0,0,0.5);backdrop-filter:blur(10px)}
-  .h-stat{padding:30px 36px;border-right:0.5px solid var(--border)}
-  .h-stat:last-child{border-right:none}
-  .h-num{font-family:'Barlow Condensed',sans-serif;font-size:46px;font-weight:800;color:var(--white);letter-spacing:-0.02em;font-variant-numeric:tabular-nums;line-height:1}
-  .h-lbl{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:var(--steel);margin-top:8px}
-
-  /* SECTIONS COMMON */
-  .sec-tag{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.16em;text-transform:uppercase;color:var(--steel);margin-bottom:14px;display:flex;align-items:center;gap:8px}
-  .sec-tag::before{content:'//';color:var(--border)}
-  .sec-head{font-family:'Barlow Condensed',sans-serif;font-size:50px;font-weight:800;letter-spacing:-0.02em;text-transform:uppercase;color:var(--white);line-height:.95}
+  /* SECTIONS */
+  section{padding:120px 48px;position:relative}
+  .sec-tag{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:var(--blue);margin-bottom:16px;font-weight:700}
+  h2.sec-head{font-family:'Barlow Condensed',sans-serif;font-size:54px;line-height:1;font-weight:800;text-transform:uppercase;letter-spacing:-0.02em;color:var(--white);margin-bottom:60px}
 
   /* SERVICES */
-  .svc-section{padding:100px 0;position:relative;z-index:1}
-  .sec-hdr{padding:0 48px 60px}
-  .cards-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border)}
-  .svc-card{background:var(--charcoal);padding:44px 38px;position:relative;overflow:hidden;cursor:none;transition:background .25s linear}
-  .svc-card::after{content:'';position:absolute;inset:0;border:1px solid transparent;transition:border-color .25s linear;pointer-events:none;z-index:2}
-  .svc-card .card-grid-overlay{position:absolute;inset:0;background-image:repeating-linear-gradient(0deg,transparent,transparent 23px,rgba(255,255,255,0.015) 23px,rgba(255,255,255,0.015) 24px),repeating-linear-gradient(90deg,transparent,transparent 23px,rgba(255,255,255,0.015) 23px,rgba(255,255,255,0.015) 24px);opacity:0;transition:opacity .25s linear;pointer-events:none}
-  .svc-card:hover{background:#161616}
-  .svc-card:hover::after{border-color:var(--edge)}
-  .svc-card:hover .card-grid-overlay{opacity:1}
-  .svc-card.selected{background:#181818}
-  .svc-card.selected::after{border-color:rgba(255,255,255,0.22)}
-  .svc-card.selected .card-grid-overlay{opacity:1}
-  .svc-icon{width:44px;height:44px;margin-bottom:28px;color:var(--steel);transition:color .25s linear}
-  .svc-card:hover .svc-icon,.svc-card.selected .svc-icon{color:var(--white)}
-  .svc-title{font-family:'Barlow Condensed',sans-serif;font-size:28px;font-weight:800;text-transform:uppercase;letter-spacing:-0.01em;color:var(--white);margin-bottom:12px;transition:color .2s linear}
-  .svc-card:hover .svc-title,.svc-card.selected .svc-title{color:var(--white)}
-  .svc-desc{font-size:15px;color:var(--steel);line-height:1.75;margin-bottom:28px;transition:color .2s linear}
-  .svc-card:hover .svc-desc{color:var(--silver)}
-  .svc-feats{list-style:none;display:flex;flex-direction:column;gap:10px}
-  .svc-feats li{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--steel);letter-spacing:0.04em;display:flex;align-items:center;gap:10px;transition:color .2s linear}
-  .svc-card:hover .svc-feats li,.svc-card.selected .svc-feats li{color:var(--white)}
-  .svc-feats li::before{content:'→';color:var(--border);transition:color .2s linear}
-  .svc-card:hover .svc-feats li::before,.svc-card.selected .svc-feats li::before{color:var(--white);text-shadow:0 0 10px rgba(255,255,255,0.5)}
-  .card-state-badge{position:absolute;top:16px;right:16px;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.2em;padding:4px 10px;border:1px solid var(--border);color:var(--border);opacity:0;transition:all .3s ease}
-  .svc-card:hover .card-state-badge{opacity:1;color:var(--white);border-color:var(--white);background:rgba(255,255,255,0.05)}
-  .svc-card.selected .card-state-badge{opacity:1;color:var(--white);border-color:rgba(255,255,255,0.4);background:rgba(255,255,255,0.08)}
-
-  /* DIAGNOSTIC LOG */
-  .diag-section{background:var(--blk);border-top:0.5px solid var(--border);border-bottom:0.5px solid var(--border);padding:100px 48px;position:relative;z-index:1}
-  .sys-metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);margin-bottom:1px}
-  .metric-block{background:var(--charcoal);padding:20px 24px}
-  .met-label{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.12em;text-transform:uppercase;color:var(--steel);margin-bottom:8px}
-  .met-bar-wrap{width:100%;height:3px;background:var(--slate);margin-bottom:6px}
-  .met-bar{height:100%;background:var(--silver);transition:width 1s linear}
-  .met-val{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--offwhite);display:flex;justify-content:space-between;font-variant-numeric:tabular-nums}
-  .dev-meta{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border);margin-top:1px}
-  .dev-meta-item{background:var(--charcoal);padding:14px 18px}
-  .dmi-label{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:var(--steel);margin-bottom:5px}
-  .dmi-val{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--offwhite)}
-  .terminal{background:var(--charcoal);border:0.5px solid var(--border);margin-top:1px}
-  .term-hdr{display:flex;align-items:center;justify-content:space-between;padding:12px 18px;border-bottom:0.5px solid var(--border);background:var(--slate)}
-  .term-dots{display:flex;gap:5px}
-  .term-dot{width:9px;height:9px;border-radius:50%}
-  .term-body{padding:24px 22px;min-height:220px}
-  .log-line{font-family:'JetBrains Mono',monospace;font-size:11px;line-height:2.2;display:flex;gap:16px;border-bottom:0.5px solid rgba(255,255,255,0.025);padding:2px 0;opacity:0;animation:fadeIn .3s linear forwards;font-variant-numeric:tabular-nums}
-  .log-time{color:var(--border);min-width:72px}
-  .log-event{color:var(--silver);flex:1}
-  .log-badge{font-size:9px;letter-spacing:0.1em;padding:2px 7px;border:0.5px solid;align-self:center;flex-shrink:0}
-  .badge-pass{color:#5A7A5A;border-color:#2A3A2A}
-  .badge-warn{color:#7A6A3A;border-color:#3A3020}
-  .badge-active{color:var(--silver);border-color:var(--steel)}
-  .badge-pending{color:var(--steel);border-color:var(--border)}
-  @keyframes fadeIn{to{opacity:1}}
-  .cursor-blink{display:inline-block;width:7px;height:12px;background:var(--silver);animation:blink 1s step-end infinite;vertical-align:middle;margin-left:3px}
-  @keyframes blink{50%{opacity:0}}
-
-  /* TRIAGE */
-  .triage-section{padding:100px 48px;background:var(--charcoal);position:relative;z-index:1}
-  .triage-widget{border:0.5px solid var(--border);margin-top:48px}
-  .triage-header{display:flex;align-items:center;justify-content:space-between;padding:16px 24px;border-bottom:0.5px solid var(--border);background:var(--slate)}
-  .triage-steps{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border)}
-  .triage-step{background:var(--charcoal);padding:32px 28px;display:none}
-  .triage-step.active{display:block}
-  .triage-q{font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:700;text-transform:uppercase;letter-spacing:-0.01em;color:var(--white);margin-bottom:20px}
-  .triage-opts{display:flex;flex-direction:column;gap:8px}
-  .triage-opt{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.06em;color:var(--silver);border:0.5px solid var(--border);padding:10px 14px;cursor:none;transition:all .2s linear;text-align:left;background:transparent}
-  .triage-opt:hover{border-color:var(--edge);color:var(--white);background:rgba(255,255,255,0.03)}
-  .triage-opt.chosen{border-color:rgba(255,255,255,0.25);color:var(--white);background:rgba(255,255,255,0.04)}
-  .triage-result{background:var(--slate);padding:28px;border-top:0.5px solid var(--border);display:none}
-  .triage-result.show{display:block}
-  .result-label{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--steel);margin-bottom:10px}
-  .result-diag{font-family:'Barlow Condensed',sans-serif;font-size:24px;font-weight:700;text-transform:uppercase;color:var(--white);margin-bottom:8px}
-  .result-path{font-size:13px;color:var(--silver);line-height:1.65}
-  .triage-reset{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--steel);background:transparent;border:0.5px solid var(--border);padding:8px 16px;cursor:none;margin-top:16px;transition:all .2s linear}
-  .triage-reset:hover{color:var(--offwhite);border-color:var(--steel)}
-  .triage-progress{display:flex;gap:4px;align-items:center}
-  .tp-seg{width:24px;height:2px;background:var(--border);transition:background .3s linear}
-  .tp-seg.done{background:var(--silver)}
+  .services-section{background:var(--carbon)}
+  .cards-grid{display:grid;grid-template-columns:repeat(auto-fit, minmax(320px, 1fr));gap:32px}
+  .svc-card{background:var(--slate);border:1px solid var(--border);border-radius:2rem;padding:48px;position:relative;overflow:hidden;transition:all .4s ease;box-shadow:var(--shadow)}
+  .svc-card:hover{transform:translateY(-8px);border-color:var(--blue)}
+  .svc-icon{width:50px;height:50px;margin-bottom:32px;color:var(--blue)}
+  .svc-title{font-family:'Barlow Condensed',sans-serif;font-size:32px;font-weight:800;text-transform:uppercase;color:var(--white);margin-bottom:16px}
+  .svc-desc{font-size:16px;color:var(--silver);line-height:1.6;margin-bottom:32px}
+  .svc-feats{list-style:none;display:flex;flex-direction:column;gap:12px}
+  .svc-feats li{font-family:'Barlow',sans-serif;font-size:14px;color:var(--silver);font-weight:500;display:flex;align-items:center;gap:12px}
+  .svc-feats li::before{content:'✓';color:var(--blue);font-weight:900}
 
   /* PROTOCOL */
-  .protocol-section{padding:100px 48px;background:var(--white)}
-  .timeline{display:grid;grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));gap:32px;margin-top:48px}
-  .tl-step{padding:24px;background:var(--charcoal);border-radius:1.5rem;border:1px solid var(--border);transition:all .3s ease}
-  .tl-step:hover{transform:translateY(-5px);border-color:var(--blue);box-shadow:var(--shadow)}
-  .tl-num{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--blue);margin-bottom:16px;font-weight:700}
-  .tl-title{font-family:'Barlow Condensed',sans-serif;font-size:24px;font-weight:800;color:var(--blk);margin-bottom:12px}
-  .tl-desc{font-size:14px;color:var(--steel);line-height:1.5}
+  .protocol-section{background:var(--carbon)}
+  .timeline{display:grid;grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));gap:32px}
+  .tl-step{padding:32px;background:var(--slate);border-radius:1.5rem;border:1px solid var(--border);transition:all .3s ease}
+  .tl-step:hover{border-color:var(--blue);box-shadow:var(--shadow)}
+  .tl-num{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--blue);margin-bottom:20px;font-weight:700}
+  .tl-title{font-family:'Barlow Condensed',sans-serif;font-size:24px;font-weight:800;color:var(--white);margin-bottom:12px}
+  .tl-desc{font-size:14px;color:var(--silver);line-height:1.5}
 
   /* CAPABILITIES */
-  .capabilities-section{padding:100px 48px;background:var(--slate)}
+  .capabilities-section{background:var(--charcoal)}
   .capabilities-grid{display:grid;grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));gap:40px}
-  .cap-item{text-align:center;padding:40px;background:var(--white);border-radius:2rem;box-shadow:var(--shadow)}
+  .cap-item{text-align:center;padding:48px;background:var(--slate);border-radius:2rem;box-shadow:var(--shadow);border:1px solid var(--border)}
   .cap-num{font-family:'Barlow Condensed',sans-serif;font-size:64px;font-weight:800;color:var(--blue);line-height:1;margin-bottom:12px}
-  .cap-num span{font-size:24px;color:var(--steel)}
-  .cap-label{font-family:'Barlow',sans-serif;font-size:16px;font-weight:700;color:var(--blk);text-transform:uppercase;margin-bottom:16px}
-  .cap-desc{font-size:14px;color:var(--steel)}
+  .cap-num span{font-size:24px;color:var(--silver)}
+  .cap-label{font-family:'Barlow',sans-serif;font-size:16px;font-weight:700;color:var(--white);text-transform:uppercase;margin-bottom:16px}
+  .cap-desc{font-size:14px;color:var(--silver)}
 
   /* BOOKING */
-  .booking-section{padding:100px 48px;background:var(--white)}
-  .booking-container{max-width:900px;margin:0 auto;display:grid;grid-template-columns:1fr 1.5fr;gap:60px;background:var(--charcoal);padding:60px;border-radius:3rem;border:1px solid var(--border);box-shadow:0 30px 60px rgba(0,0,0,0.05)}
-  .bk-info h3{font-family:'Barlow Condensed',sans-serif;font-size:42px;font-weight:800;line-height:1;margin-bottom:24px}
-  .bk-info p{font-size:16px;color:var(--steel);margin-bottom:32px}
-  
-  .form-group{margin-bottom:24px}
-  .form-group label{display:block;font-size:12px;font-weight:700;text-transform:uppercase;color:var(--steel);margin-bottom:8px;letter-spacing:0.05em}
-  .form-control{width:100%;padding:16px;background:var(--white);border:1px solid var(--border);border-radius:1rem;color:var(--blk);font-family:'Barlow',sans-serif;font-size:15px;transition:all .3s ease}
-  .form-control:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 4px rgba(0,122,255,0.1)}
+  .booking-section{background:var(--carbon)}
+  .booking-container{max-width:1000px;margin:0 auto;display:grid;grid-template-columns:1fr 1.5fr;gap:80px;background:var(--charcoal);padding:80px;border-radius:3rem;border:1px solid var(--border);box-shadow:var(--shadow)}
+  .bk-info h3{font-family:'Barlow Condensed',sans-serif;font-size:48px;font-weight:800;line-height:1;margin-bottom:24px;color:var(--white)}
+  .bk-info p{font-size:17px;color:var(--silver);margin-bottom:32px}
+  .form-group{margin-bottom:28px}
+  .form-group label{display:block;font-size:11px;font-weight:700;text-transform:uppercase;color:var(--silver);margin-bottom:10px;letter-spacing:0.1em}
+  .form-control{width:100%;padding:18px;background:var(--slate);border:1px solid var(--border);border-radius:1rem;color:var(--white);font-family:'Barlow',sans-serif;font-size:16px;transition:all .3s ease}
+  .form-control:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 4px rgba(10,132,255,0.1)}
 
   /* CASE STUDIES */
-  .cases-section{padding:100px 48px;background:var(--slate)}
+  .cases-section{background:var(--charcoal)}
   .cases-grid{display:grid;grid-template-columns:repeat(auto-fit, minmax(350px, 1fr));gap:32px}
-  .case-card{background:var(--white);padding:40px;border-radius:2rem;border:1px solid var(--border);box-shadow:var(--shadow);transition:all .3s ease}
-  .case-card:hover{transform:translateY(-8px);box-shadow:0 20px 40px rgba(0,0,0,0.08)}
+  .case-card{background:var(--slate);padding:40px;border-radius:2rem;border:1px solid var(--border);box-shadow:var(--shadow);transition:all .3s ease}
+  .case-card:hover{transform:translateY(-8px);border-color:var(--blue)}
   .case-id{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--blue);margin-bottom:20px;font-weight:700}
-  .case-title{font-family:'Barlow Condensed',sans-serif;font-size:28px;font-weight:800;color:var(--blk);margin-bottom:16px}
-  .case-summary{font-size:15px;color:var(--steel);line-height:1.6;margin-bottom:24px}
+  .case-title{font-family:'Barlow Condensed',sans-serif;font-size:28px;font-weight:800;color:var(--white);margin-bottom:16px}
+  .case-summary{font-size:15px;color:var(--silver);line-height:1.6;margin-bottom:24px}
   .case-outcome{font-family:'Barlow',sans-serif;font-size:12px;color:#10B981;font-weight:700;display:flex;align-items:center;gap:8px}
   .case-outcome::before{content:'✓';font-weight:900}
 
   /* FOOTER */
-  footer{padding:44px 48px 36px;border-top:0.5px solid var(--border);display:flex;align-items:flex-start;justify-content:space-between;position:relative;z-index:1;background:var(--carbon)}
-  .ft-brand{display:flex;flex-direction:column;gap:12px}
-  .ft-brand .logo-mark{width:180px;height:auto;margin-bottom:12px;filter:drop-shadow(0 0 12px rgba(255,255,255,0.1))}
-  .ft-brand .logo-mark img{width:100%;height:auto;opacity:0.85;transition:opacity .3s ease}
-  .ft-brand .logo-mark:hover img{opacity:1}
-  .ft-brand .wm{font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--white)}
-  .ft-brand .tg{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--steel);letter-spacing:0.08em;margin-top:10px}
-  .ft-links{display:flex;gap:44px}
-  .fc{display:flex;flex-direction:column;gap:10px}
-  .fc-title{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.12em;text-transform:uppercase;color:var(--silver);margin-bottom:2px}
-  .fc a{font-size:12px;color:var(--steel);text-decoration:none;transition:color .2s linear}
-  .fc a:hover{color:var(--offwhite)}
-  .ft-bot{padding:18px 48px;border-top:0.5px solid var(--border);display:flex;align-items:center;justify-content:space-between;position:relative;z-index:1;background:var(--carbon)}
-  .ft-copy{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--steel);letter-spacing:0.06em}
+  footer{padding:100px 48px 60px;border-top:1px solid var(--border);background:var(--charcoal);display:flex;justify-content:space-between;align-items:flex-start}
+  .ft-brand{display:flex;flex-direction:column;gap:16px}
+  .ft-brand .logo-mark{width:160px;height:auto;margin-bottom:16px}
+  .ft-brand .logo-mark img{width:100%;height:auto}
+  .ft-brand .wm{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;color:var(--white)}
+  .ft-links{display:flex;gap:80px}
+  .ft-col{display:flex;flex-direction:column;gap:16px}
+  .ft-head{font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--white);margin-bottom:8px}
+  .ft-col a{font-size: 14px;color:var(--silver);text-decoration:none;transition:color .2s ease}
+  .ft-col a:hover{color:var(--white)}
 
-  /* RESPONSIVE */
   @media(max-width:960px){
-    .hero{grid-template-columns:1fr}
-    .hero-right{display:none}
-    nav{padding:16px 24px}
+    nav{padding:14px 24px}
     .nav-links{display:none}
-    .hero-left{padding:80px 24px 60px}
-    h1.hero-head{font-size:56px}
-    .svc-section,.diag-section,.triage-section,.protocol-section,.cap-section,.cases-section,.booking-section{padding:60px 24px}
-    .cards-grid,.triage-steps,.cases-grid,.capabilities-grid{grid-template-columns:1fr}
-    .timeline{grid-template-columns:repeat(2,1fr)}
-    .bk-grid{grid-template-columns:1fr;gap:40px}
-    .fr{grid-template-columns:1fr}
-    footer{flex-direction:column;gap:32px;padding:40px 24px 28px}
-    .ft-bot{padding:16px 24px}
-    .ft-links{gap:32px}
-    #rail{display:none}
-    .sys-metrics,.dev-meta{grid-template-columns:1fr 1fr}
+    section{padding:80px 24px}
+    h1.hero-head{font-size:52px}
+    .booking-container{grid-template-columns:1fr;padding:40px 24px}
+    footer{flex-direction:column;gap:60px}
   }
 </style>
 </head>
 <body>
 
-<!-- CURSOR -->
 <div id="cur-ring"></div>
 <div id="cur-dot"></div>
-<div id="cur-label"></div>
 
-<!-- PRELOADER -->
-<div id="preloader">
-  <div class="pre-logo" id="pre-logo">AppleSolaris Technicals</div>
-  <div class="pre-line" id="pl0">INITIALIZING APPLESOLARISTECHNICALS...</div>
-  <div class="pre-line" id="pl1">LOADING DIAGNOSTIC MODULES [4/4]</div>
-  <div class="pre-line" id="pl2">CALIBRATING SENSOR ARRAY...</div>
-  <div class="pre-line" id="pl3">HARDWARE INTEGRITY — PASS</div>
-  <div class="pre-line" id="pl4">THERMAL PROFILE — NOMINAL</div>
-  <div class="pre-line" id="pl5">SYSTEM READY</div>
-  <div class="pre-bar-wrap"><div class="pre-bar" id="pre-bar"></div></div>
-</div>
-
-<!-- AMBIENT -->
-<div id="ambient">
-  <canvas id="grid-c"></canvas>
-  <div class="scan-line"></div>
-  <div class="scan-line"></div>
-  <div class="scan-line"></div>
-</div>
-
-<!-- SCROLL RAIL -->
-<div id="rail">
-  <div class="rail-stage active" onclick="scrollTo({top:0,behavior:'smooth'})"><span class="rail-label">INIT</span><div class="rail-line"></div></div>
-  <div class="rail-stage" onclick="document.getElementById('services').scrollIntoView({behavior:'smooth'})"><span class="rail-label">SCAN</span><div class="rail-line"></div></div>
-  <div class="rail-stage" onclick="document.getElementById('diagnostics').scrollIntoView({behavior:'smooth'})"><span class="rail-label">DIAG</span><div class="rail-line"></div></div>
-  <div class="rail-stage" onclick="document.getElementById('triage').scrollIntoView({behavior:'smooth'})"><span class="rail-label">TRIAGE</span><div class="rail-line"></div></div>
-  <div class="rail-stage" onclick="document.getElementById('protocol').scrollIntoView({behavior:'smooth'})"><span class="rail-label">VERIFY</span><div class="rail-line"></div></div>
-  <div class="rail-stage" onclick="document.getElementById('booking').scrollIntoView({behavior:'smooth'})"><span class="rail-label">DEPLOY</span><div class="rail-line"></div></div>
-</div>
-
-<!-- NAVIGATION -->
 <nav>
   <a href="#hero" class="nav-brand">
-    <div class="nav-mark">
-      <img src="AppleSolarisLogo.png" alt="AppleSolaris Logo">
-    </div>
+    <div class="nav-mark"><img src="logo_white.png" alt="Logo"></div>
     <div class="nav-wordmark">Apple<span>Solaris</span> Technicals</div>
   </a>
   <div class="nav-links">
     <a href="#services">Services</a>
     <a href="#protocol">Process</a>
     <a href="#booking">Book Now</a>
-    <button class="btn-p" style="padding:10px 20px;border-radius:0.75rem" onclick="document.getElementById('booking').scrollIntoView({behavior:'smooth'})">Get Help</button>
+    <a href="#booking" class="btn-p" style="padding:10px 20px;border-radius:0.75rem">Get Help</a>
   </div>
 </nav>
 
-<!-- HERO -->
 <section class="hero" id="hero">
   <div class="hero-bg"></div>
   <div class="hero-card">
-    <div class="hero-logo-mark">
-      <img src="AppleSolarisLogo.png" alt="AppleSolaris Logo">
-    </div>
+    <div class="hero-logo-mark"><img src="logo_white.png" alt="Logo"></div>
     <div class="eyebrow">Professional Tech Service // Nairobi, Kenya</div>
     <h1 class="hero-head">Expert <span>Apple</span><br>& PC Repair</h1>
     <p class="hero-sub">Fast, reliable, and professional repairs for your Mac, iPhone, and Windows devices. We make complex fixes simple for you.</p>
     <div class="hero-actions">
-      <button class="btn-p" onclick="document.getElementById('booking').scrollIntoView({behavior:'smooth'})">Book Your Repair</button>
-      <button class="btn-g" onclick="document.getElementById('services').scrollIntoView({behavior:'smooth'})">Our Services</button>
-    </div>
-  </div>
-</section>
-  <div class="hero-right">
-    <div id="mb-canvas">
-      <svg id="mb-svg" viewBox="0 0 400 340" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
-        <rect width="400" height="340" fill="#121212"/>
-        <g opacity="0.18">
-          <line x1="0" y1="40" x2="400" y2="40" stroke="#2D2D2D" stroke-width="0.5"/>
-          <line x1="0" y1="80" x2="400" y2="80" stroke="#2D2D2D" stroke-width="0.5"/>
-          <line x1="0" y1="120" x2="400" y2="120" stroke="#2D2D2D" stroke-width="0.5"/>
-          <line x1="0" y1="160" x2="400" y2="160" stroke="#2D2D2D" stroke-width="0.5"/>
-          <line x1="0" y1="200" x2="400" y2="200" stroke="#2D2D2D" stroke-width="0.5"/>
-          <line x1="0" y1="240" x2="400" y2="240" stroke="#2D2D2D" stroke-width="0.5"/>
-          <line x1="0" y1="280" x2="400" y2="280" stroke="#2D2D2D" stroke-width="0.5"/>
-          <line x1="40" y1="0" x2="40" y2="340" stroke="#2D2D2D" stroke-width="0.5"/>
-          <line x1="80" y1="0" x2="80" y2="340" stroke="#2D2D2D" stroke-width="0.5"/>
-          <line x1="120" y1="0" x2="120" y2="340" stroke="#2D2D2D" stroke-width="0.5"/>
-          <line x1="160" y1="0" x2="160" y2="340" stroke="#2D2D2D" stroke-width="0.5"/>
-          <line x1="200" y1="0" x2="200" y2="340" stroke="#2D2D2D" stroke-width="0.5"/>
-          <line x1="240" y1="0" x2="240" y2="340" stroke="#2D2D2D" stroke-width="0.5"/>
-          <line x1="280" y1="0" x2="280" y2="340" stroke="#2D2D2D" stroke-width="0.5"/>
-          <line x1="320" y1="0" x2="320" y2="340" stroke="#2D2D2D" stroke-width="0.5"/>
-          <line x1="360" y1="0" x2="360" y2="340" stroke="#2D2D2D" stroke-width="0.5"/>
-        </g>
-        <g opacity="0.4">
-          <polyline points="200,170 200,120 280,120 280,60" fill="none" stroke="#2D2D2D" stroke-width="0.75"/>
-          <polyline points="200,170 120,170 120,80 80,80" fill="none" stroke="#2D2D2D" stroke-width="0.75"/>
-          <polyline points="200,170 200,220 320,220 320,280" fill="none" stroke="#2D2D2D" stroke-width="0.75"/>
-          <polyline points="200,170 80,170 80,240 40,240" fill="none" stroke="#2D2D2D" stroke-width="0.75"/>
-          <polyline points="200,170 340,170 340,120 380,120" fill="none" stroke="#2D2D2D" stroke-width="0.75"/>
-          <polyline points="120,170 120,220 60,220" fill="none" stroke="#2D2D2D" stroke-width="0.75"/>
-          <polyline points="320,220 320,260 360,260" fill="none" stroke="#2D2D2D" stroke-width="0.75"/>
-        </g>
-        <g id="mb-active-traces" opacity="0" style="transition:opacity .4s linear">
-          <polyline id="tr0" points="200,170 200,120 280,120 280,60" fill="none" stroke="#A3A3A3" stroke-width="1" stroke-dasharray="300" stroke-dashoffset="300"/>
-          <polyline id="tr1" points="200,170 120,170 120,80 80,80" fill="none" stroke="#A3A3A3" stroke-width="1" stroke-dasharray="300" stroke-dashoffset="300"/>
-          <polyline id="tr2" points="200,170 200,220 320,220 320,280" fill="none" stroke="#A3A3A3" stroke-width="1" stroke-dasharray="300" stroke-dashoffset="300"/>
-          <polyline id="tr3" points="200,170 80,170 80,240 40,240" fill="none" stroke="#A3A3A3" stroke-width="1" stroke-dasharray="300" stroke-dashoffset="300"/>
-          <polyline id="tr4" points="200,170 340,170 340,120 380,120" fill="none" stroke="#A3A3A3" stroke-width="1" stroke-dasharray="300" stroke-dashoffset="300"/>
-        </g>
-        <g id="mb-nodes">
-          <g class="mb-node" data-service="0" data-label="MAC REPAIR" style="cursor:none">
-            <rect x="160" y="148" width="80" height="44" rx="2" fill="#1A1A1A" stroke="#3A3A3A" stroke-width="0.75"/>
-            <text x="200" y="166" font-family="JetBrains Mono,monospace" font-size="7" fill="#5A5A5A" text-anchor="middle" letter-spacing="0.08em">CPU</text>
-            <text x="200" y="181" font-family="JetBrains Mono,monospace" font-size="6" fill="#3A3A3A" text-anchor="middle" letter-spacing="0.06em">M3 PRO</text>
-          </g>
-          <g class="mb-node" data-service="0" data-label="MAC REPAIR" style="cursor:none">
-            <rect x="256" y="40" width="48" height="36" rx="1" fill="#1A1A1A" stroke="#3A3A3A" stroke-width="0.5"/>
-            <text x="280" y="62" font-family="JetBrains Mono,monospace" font-size="6.5" fill="#5A5A5A" text-anchor="middle" letter-spacing="0.06em">NAND</text>
-          </g>
-          <g class="mb-node" data-service="1" data-label="iPHONE SERVICE" style="cursor:none">
-            <rect x="56" y="62" width="56" height="32" rx="1" fill="#1A1A1A" stroke="#3A3A3A" stroke-width="0.5"/>
-            <text x="84" y="82" font-family="JetBrains Mono,monospace" font-size="6.5" fill="#5A5A5A" text-anchor="middle" letter-spacing="0.06em">BASEBAND</text>
-          </g>
-          <g class="mb-node" data-service="2" data-label="WINDOWS ENG" style="cursor:none">
-            <rect x="296" y="260" width="52" height="32" rx="1" fill="#1A1A1A" stroke="#3A3A3A" stroke-width="0.5"/>
-            <text x="322" y="280" font-family="JetBrains Mono,monospace" font-size="6.5" fill="#5A5A5A" text-anchor="middle" letter-spacing="0.06em">GPU CORE</text>
-          </g>
-          <g class="mb-node" data-service="1" data-label="iPHONE SERVICE" style="cursor:none">
-            <rect x="16" y="224" width="52" height="32" rx="1" fill="#1A1A1A" stroke="#3A3A3A" stroke-width="0.5"/>
-            <text x="42" y="244" font-family="JetBrains Mono,monospace" font-size="6.5" fill="#5A5A5A" text-anchor="middle" letter-spacing="0.06em">FACE ID</text>
-          </g>
-          <g class="mb-node" data-service="2" data-label="WINDOWS ENG" style="cursor:none">
-            <rect x="356" y="102" width="38" height="32" rx="1" fill="#1A1A1A" stroke="#3A3A3A" stroke-width="0.5"/>
-            <text x="375" y="122" font-family="JetBrains Mono,monospace" font-size="6" fill="#5A5A5A" text-anchor="middle" letter-spacing="0.04em">BIOS</text>
-          </g>
-  <div class="hero-stats">
-    <div class="h-stat">
-      <div class="h-num">98.4<span style="font-size:18px;color:var(--steel)">%</span></div>
-      <div class="h-lbl">Success Rate</div>
-    </div>
-    <div class="h-stat">
-      <div class="h-num">24<span style="font-size:18px;color:var(--steel)">hr</span></div>
-      <div class="h-lbl">Typical Repair Time</div>
+      <a href="#booking" class="btn-p">Book Your Repair</a>
+      <a href="#services" class="btn-g">Our Services</a>
     </div>
   </div>
 </section>
 
-<!-- SERVICES -->
-<section class="svc-section" id="services">
-  <div class="sec-hdr">
-    <div class="sec-tag">01 — Services</div>
-    <h2 class="sec-head">Repair<br>Ecosystems</h2>
-  </div>
+<section class="services-section" id="services">
+  <div class="sec-tag">What We Do</div>
+  <h2 class="sec-head">Premium Repair<br>Services</h2>
   <div class="cards-grid">
-    <div class="svc-card" id="svc0">
-      <div class="svc-icon">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
-      </div>
+    <div class="svc-card">
+      <div class="svc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></div>
       <h3 class="svc-title">Mac Repair</h3>
       <p class="svc-desc">Expert fixes for all MacBooks and iMacs, from broken screens to motherboard issues.</p>
       <ul class="svc-feats">
@@ -423,10 +173,8 @@
         <li>Professional Data Recovery</li>
       </ul>
     </div>
-    <div class="svc-card" id="svc1">
-      <div class="svc-icon">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12" y2="18"/></svg>
-      </div>
+    <div class="svc-card">
+      <div class="svc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12" y2="18"/></svg></div>
       <h3 class="svc-title">iPhone Repair</h3>
       <p class="svc-desc">Fast and reliable service for all iPhone models using high-quality original parts.</p>
       <ul class="svc-feats">
@@ -436,10 +184,8 @@
         <li>Signal & Software Fixes</li>
       </ul>
     </div>
-    <div class="svc-card" id="svc2">
-      <div class="svc-icon">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/></svg>
-      </div>
+    <div class="svc-card">
+      <div class="svc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/></svg></div>
       <h3 class="svc-title">Windows PC Repair</h3>
       <p class="svc-desc">Complete hardware and software service for all laptop and desktop computer brands.</p>
       <ul class="svc-feats">
@@ -452,98 +198,6 @@
   </div>
 </section>
 
-<!-- DIAGNOSTIC LOG -->
-<section class="diag-section" id="diagnostics">
-  <div class="sec-tag">02 — Diagnostics</div>
-  <h2 class="sec-head" style="margin-bottom:40px">System<br>Feed</h2>
-  <div class="sys-metrics">
-    <div class="metric-block">
-      <div class="met-label">CPU Load</div>
-      <div class="met-bar-wrap"><div class="met-bar" id="mb-cpu" style="width:34%"></div></div>
-      <div class="met-val"><span>Diagnostic thread</span><span id="mv-cpu">34%</span></div>
-    </div>
-    <div class="metric-block">
-      <div class="met-label">Memory</div>
-      <div class="met-bar-wrap"><div class="met-bar" id="mb-mem" style="width:61%"></div></div>
-      <div class="met-val"><span>16.4 GB / 32 GB</span><span id="mv-mem">61%</span></div>
-    </div>
-    <div class="metric-block">
-      <div class="met-label">Thermal</div>
-      <div class="met-bar-wrap"><div class="met-bar" id="mb-therm" style="width:47%;background:#7A6A4A"></div></div>
-      <div class="met-val"><span>Junction temp</span><span id="mv-therm" style="color:#8A7A5A">47°C</span></div>
-    </div>
-  </div>
-  <div class="dev-meta">
-    <div class="dev-meta-item"><div class="dmi-label">Device</div><div class="dmi-val">MacBook Pro 16"</div></div>
-    <div class="dev-meta-item"><div class="dmi-label">Serial</div><div class="dmi-val">C02ZK4MDMD6T</div></div>
-    <div class="dev-meta-item"><div class="dmi-label">OS Build</div><div class="dmi-val">macOS 15.3 (24D60)</div></div>
-    <div class="dev-meta-item"><div class="dmi-label">Session</div><div class="dmi-val">AST-2026-0441</div></div>
-  </div>
-  <div class="terminal">
-    <div class="term-hdr">
-      <div class="term-dots">
-        <div class="term-dot" style="background:#3A3A3A"></div>
-        <div class="term-dot" style="background:#2D2D2D"></div>
-        <div class="term-dot" style="background:#252525"></div>
-      </div>
-      <span style="font-family:'JetBrains Mono',monospace;font-size:9px;color:#5A5A5A;letter-spacing:0.1em">AST-DIAG v2.4.1 // SESSION ACTIVE</span>
-      <span style="font-family:'JetBrains Mono',monospace;font-size:9px;color:#5A7A5A;letter-spacing:0.08em">● LIVE</span>
-    </div>
-    <div class="term-body" id="log-body"></div>
-  </div>
-</section>
-
-<!-- TRIAGE -->
-<section class="triage-section" id="triage">
-  <div class="sec-tag">03 — Triage</div>
-  <h2 class="sec-head">Self-Diagnose<br>Your Device</h2>
-  <div class="triage-widget">
-    <div class="triage-header">
-      <span style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.12em;color:#5A5A5A;text-transform:uppercase">Repair Triage Protocol</span>
-      <div class="triage-progress">
-        <div class="tp-seg done" id="tp0"></div>
-        <div class="tp-seg" id="tp1"></div>
-        <div class="tp-seg" id="tp2"></div>
-      </div>
-    </div>
-    <div class="triage-steps">
-      <div class="triage-step active" id="ts0">
-        <div class="triage-q">01 — Select Device</div>
-        <div class="triage-opts" id="to0">
-          <button class="triage-opt" data-val="Mac">MacBook / iMac / Mac</button>
-          <button class="triage-opt" data-val="iPhone">iPhone / iPad</button>
-          <button class="triage-opt" data-val="Windows">Windows Laptop / Desktop</button>
-        </div>
-      </div>
-      <div class="triage-step" id="ts1">
-        <div class="triage-q">02 — Primary Symptom</div>
-        <div class="triage-opts" id="to1">
-          <button class="triage-opt" data-val="No power / Won't boot">No power / Won't boot</button>
-          <button class="triage-opt" data-val="Screen damage / No display">Screen damage / No display</button>
-          <button class="triage-opt" data-val="Water / liquid exposure">Water / liquid exposure</button>
-          <button class="triage-opt" data-val="Slow / overheating">Slow / overheating</button>
-          <button class="triage-opt" data-val="Data loss / storage fault">Data loss / storage fault</button>
-        </div>
-      </div>
-      <div class="triage-step" id="ts2">
-        <div class="triage-q">03 — Onset</div>
-        <div class="triage-opts" id="to2">
-          <button class="triage-opt" data-val="sudden">Occurred suddenly</button>
-          <button class="triage-opt" data-val="gradual">Gradual degradation</button>
-          <button class="triage-opt" data-val="after event">Following a drop / liquid event</button>
-        </div>
-      </div>
-    </div>
-    <div class="triage-result" id="triage-result">
-      <div class="result-label">Probable Diagnosis</div>
-      <div class="result-diag" id="result-diag">—</div>
-      <div class="result-path" id="result-path">—</div>
-      <button class="triage-reset" onclick="resetTriage()">Reset // New Triage</button>
-    </div>
-  </div>
-</section>
-
-<!-- PROTOCOL -->
 <section class="protocol-section" id="protocol">
   <div class="sec-tag">Our Process</div>
   <h2 class="sec-head">How We Fix<br>Your Device</h2>
@@ -557,7 +211,6 @@
   </div>
 </section>
 
-<!-- CAPABILITIES -->
 <section class="capabilities-section">
   <div class="sec-tag">Our Performance</div>
   <h2 class="sec-head">Trusted by<br>Thousands</h2>
@@ -569,7 +222,6 @@
   </div>
 </section>
 
-<!-- REPAIR STORIES -->
 <section class="cases-section" id="cases">
   <div class="sec-tag">Repair History</div>
   <h2 class="sec-head">Recent<br>Successes</h2>
@@ -581,7 +233,7 @@
       <div class="case-outcome">Device restored and data saved</div>
     </div>
     <div class="case-card">
-      <div class="case-id">CASE #2026-04 // IPHONE 15</div>
+      <div class="case-id">CASE #2026-04 // IPHONE 15 Pro</div>
       <h3 class="case-title">Advanced Screen Repair</h3>
       <p class="case-summary">Severe screen damage and housing issues. We replaced the display with an original part and restored the Face ID function.</p>
       <div class="case-outcome">Original quality restored</div>
@@ -595,7 +247,6 @@
   </div>
 </section>
 
-<!-- BOOKING -->
 <section class="booking-section" id="booking">
   <div class="booking-container">
     <div class="bk-info">
@@ -605,308 +256,53 @@
     </div>
     <div class="bk-form">
       <form>
-        <div class="form-group">
-          <label>Full Name</label>
-          <input type="text" class="form-control" placeholder="John Doe">
-        </div>
-        <div class="form-group">
-          <label>Device Model</label>
-          <input type="text" class="form-control" placeholder="MacBook Pro M2, iPhone 15, etc.">
-        </div>
-        <div class="form-group">
-          <label>The Problem</label>
-          <input type="text" class="form-control" placeholder="Broken screen, won't turn on...">
-        </div>
+        <div class="fg" style="margin-bottom:24px"><label style="display:block;font-size:11px;font-weight:700;text-transform:uppercase;color:var(--silver);margin-bottom:8px">Full Name</label><input type="text" class="form-control" placeholder="John Doe"></div>
+        <div class="fg" style="margin-bottom:24px"><label style="display:block;font-size:11px;font-weight:700;text-transform:uppercase;color:var(--silver);margin-bottom:8px">Device Model</label><input type="text" class="form-control" placeholder="e.g. MacBook Pro M2"></div>
+        <div class="fg" style="margin-bottom:24px"><label style="display:block;font-size:11px;font-weight:700;text-transform:uppercase;color:var(--silver);margin-bottom:8px">The Problem</label><input type="text" class="form-control" placeholder="e.g. Broken screen"></div>
         <button type="submit" class="btn-p" style="width:100%">Submit Request</button>
       </form>
     </div>
   </div>
 </section>
 
-      <div class="case-outcome">Data fully preserved. Full boot confirmed.</div>
-    </div>
-    <div class="case-card">
-      <div class="case-id">AST-2026-0401 // CLOSED</div>
-      <div class="case-device">iPhone 15 Pro Max</div>
-      <div class="case-issue">Face ID non-functional post third-party display repair</div>
-      <div class="case-row"><span class="cr-label">Fault</span><span class="cr-val">Dot projector flex damage</span></div>
-      <div class="case-row"><span class="cr-label">Repair</span><span class="cr-val">Flex cable replacement + recalibration</span></div>
-      <div class="case-row"><span class="cr-label">Turnaround</span><span class="cr-val">24 hours</span></div>
-      <div class="case-outcome">Face ID restored. All biometrics nominal.</div>
-    </div>
-    <div class="case-card">
-      <div class="case-id">AST-2026-0418 // CLOSED</div>
-      <div class="case-device">Dell XPS 15 (Windows)</div>
-      <div class="case-issue">Thermal throttling, sustained 97°C under load</div>
-      <div class="case-row"><span class="cr-label">Fault</span><span class="cr-val">Degraded compound + clogged fins</span></div>
-      <div class="case-row"><span class="cr-label">Repair</span><span class="cr-val">Full thermal overhaul, liquid metal</span></div>
-      <div class="case-row"><span class="cr-label">Turnaround</span><span class="cr-val">48 hours</span></div>
-      <div class="case-outcome">Peak temp reduced to 71°C. Performance restored.</div>
-    </div>
-  </div>
-</section>
-
-<!-- BOOKING -->
-<section class="booking-section" id="booking">
-  <div class="sec-tag">07 — Booking</div>
-  <h2 class="sec-head">Submit<br>Service Request</h2>
-  <div class="bk-grid">
-    <div class="bk-info">
-      <div class="bk-block"><div class="bk-lbl">Protocol</div><p class="bk-txt">Submit a request and receive a diagnostic intake form. Devices assessed within 2 hours of arrival. Fault reports delivered before any repair commences.</p></div>
-      <div class="bk-block"><div class="bk-lbl">Location</div><p class="bk-txt">Operating from Nairobi, Kenya. Walk-in, drop-off, and postal service available for all device categories.</p></div>
-      <div class="bk-block"><div class="bk-lbl">Turnaround</div><p class="bk-txt">Standard: 24–48 hours. Express: same-day. Board-level work: 3–5 business days.</p></div>
-    </div>
-    <div class="bk-form">
-      <div class="fr">
-        <div class="fg"><label class="fl">Full Name</label><input class="fi" type="text" placeholder="J. Kamau"></div>
-        <div class="fg"><label class="fl">Contact</label><input class="fi" type="text" placeholder="+254 7xx xxx xxx"></div>
-      </div>
-      <div class="fg">
-        <label class="fl">Device Category</label>
-        <select class="fs"><option value="">— Select —</option><option>MacBook Air / Pro</option><option>iMac / Mac Mini / Mac Pro</option><option>iPhone</option><option>iPad</option><option>Windows Laptop</option><option>Windows Desktop</option></select>
-      </div>
-      <div class="fg">
-        <label class="fl">Service Required</label>
-        <select class="fs"><option value="">— Select —</option><option>Full Diagnostic</option><option>Logic Board Repair</option><option>Display Replacement</option><option>Data Recovery</option><option>Battery Service</option><option>Water Damage Assessment</option></select>
-      </div>
-      <div class="fg"><label class="fl">Fault Description</label><textarea class="fta" placeholder="Describe symptoms, error codes, or observed behavior..."></textarea></div>
-      <button class="sub-btn">Submit Request →</button>
-    </div>
-  </div>
-</section>
-
-<!-- FOOTER -->
 <footer>
   <div class="ft-brand">
-    <div class="logo-mark">
-      <img src="AppleSolarisLogo.png" alt="AppleSolaris Logo">
-    </div>
+    <div class="logo-mark"><img src="logo_white.png" alt="Logo" style="width:120px"></div>
     <div class="wm">AppleSolaris Technicals</div>
-    <div class="tg">Nairobi's Premium Tech Repair Studio</div>
+    <div class="tg" style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--silver);margin-top:8px">Nairobi's Premium Tech Repair Studio</div>
   </div>
   <div class="ft-links">
     <div class="ft-col">
       <div class="ft-head">Services</div>
       <a href="#services">Mac Repair</a>
       <a href="#services">iPhone Service</a>
-      <a href="#capabilities">About</a>
-      <a href="#protocol">Protocol</a>
-      <a href="#cases">Case Studies</a>
-      <a href="#booking">Contact</a>
+      <a href="#services">PC Engineering</a>
+    </div>
+    <div class="ft-col">
+      <div class="ft-head">Company</div>
+      <a href="#protocol">Our Process</a>
+      <a href="#booking">Book Appointment</a>
     </div>
   </div>
 </footer>
-<div class="ft-bot">
-  <span class="ft-copy">© 2026 AppleSolaris Technicals — Nairobi, Kenya</span>
-  <span class="ft-copy" style="color:#2D2D2D">AST-WEB v2.0 // ALL SYSTEMS NOMINAL</span>
-</div>
 
 <script>
-(function(){
-  /* CURSOR */
-  const ring=document.getElementById('cur-ring'),dot=document.getElementById('cur-dot'),lbl=document.getElementById('cur-label');
-  let mx=0,my=0,rx=0,ry=0;
-  document.addEventListener('mousemove',e=>{
-    mx=e.clientX;my=e.clientY;
-    dot.style.left=mx+'px';dot.style.top=my+'px';
-    lbl.style.left=(mx+14)+'px';lbl.style.top=my+'px';
+  const ring = document.getElementById('cur-ring');
+  const dot = document.getElementById('cur-dot');
+  window.addEventListener('mousemove', (e) => {
+    ring.style.left = e.clientX + 'px';
+    ring.style.top = e.clientY + 'px';
+    dot.style.left = e.clientX + 'px';
+    dot.style.top = e.clientY + 'px';
   });
-  (function loop(){
-    rx+=(mx-rx)*.12;ry+=(my-ry)*.12;
-    ring.style.left=rx+'px';ring.style.top=ry+'px';
-    requestAnimationFrame(loop);
-  })();
-  function setCursor(el){
-    const tag=el.tagName.toLowerCase();
-    const isBtn=tag==='button'||tag==='a'||tag==='input'||tag==='select'||tag==='textarea';
-    const isTech=el.classList.contains('svc-card')||el.classList.contains('mb-node')||!!el.closest('.mb-node')||!!el.closest('.svc-card');
-    document.body.classList.remove('cur-btn','cur-cross');
-    lbl.style.opacity='0';
-    if(isBtn){
-      document.body.classList.add('cur-btn');
-      if(el.dataset&&el.dataset.label){lbl.textContent=el.dataset.label;lbl.style.opacity='1';}
-    } else if(isTech){
-      document.body.classList.add('cur-cross');
-    }
-  }
-  document.addEventListener('mouseover',e=>setCursor(e.target));
-
-  /* PRELOADER */
-  const preLogo=document.getElementById('pre-logo');
-  const preLines=[0,1,2,3,4,5].map(i=>document.getElementById('pl'+i));
-  const preBar=document.getElementById('pre-bar');
-  let pStep=0;
-  setTimeout(()=>{preLogo.classList.add('show')},100);
-  function runPre(){
-    if(pStep<preLines.length){
-      preLines[pStep].classList.add('lit');
-      preBar.style.width=Math.round((pStep+1)/preLines.length*100)+'%';
-      if(pStep>0){preLines[pStep-1].classList.remove('lit');preLines[pStep-1].classList.add('done');}
-      pStep++;
-      setTimeout(runPre,pStep===1?500:pStep===6?700:300);
-    } else {
-      setTimeout(()=>{
-        document.getElementById('preloader').classList.add('out');
-        setTimeout(()=>{document.getElementById('preloader').style.display='none'},700);
-      },500);
-    }
-  }
-  setTimeout(runPre,400);
-
-  /* AMBIENT GRID */
-  const gc=document.getElementById('grid-c');
-  const ctx=gc.getContext('2d');
-  function resizeGrid(){gc.width=window.innerWidth;gc.height=window.innerHeight;drawGrid();}
-  function drawGrid(){
-    ctx.clearRect(0,0,gc.width,gc.height);
-    ctx.strokeStyle='rgba(255,255,255,0.025)';ctx.lineWidth=0.5;
-    const sp=40;
-    for(let x=0;x<gc.width;x+=sp){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,gc.height);ctx.stroke();}
-    for(let y=0;y<gc.height;y+=sp){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(gc.width,y);ctx.stroke();}
-    const t=Date.now()/1000;
-    const pts=[[160,200],[280,160],[400,280],[520,120],[640,240],[200,360],[440,80],[720,300],[880,180]];
-    pts.forEach(([px,py])=>{
-      const a=0.1+0.08*Math.sin(t*0.6+px*0.01+py*0.01);
-      ctx.strokeStyle=`rgba(255,255,255,${a})`;ctx.lineWidth=0.75;
-      ctx.beginPath();ctx.arc(px%gc.width,py%gc.height,2.5,0,Math.PI*2);ctx.stroke();
-    });
-  }
-  resizeGrid();
-  window.addEventListener('resize',resizeGrid);
-  setInterval(drawGrid,80);
-
-  /* MOTHERBOARD INTERACTION */
-  const mbNodes=document.querySelectorAll('.mb-node');
-  const activeTrArr=[0,1,2,3,4].map(i=>document.getElementById('tr'+i));
-  const mbLabel=document.getElementById('mb-hover-label');
-  const activeTrGroup=document.getElementById('mb-active-traces');
-  mbNodes.forEach(n=>{
-    n.addEventListener('mouseenter',()=>{
-      const svc=parseInt(n.dataset.service);
-      activeTrGroup.style.opacity='1';
-      activeTrArr.forEach((t,i)=>{
-        if(i<=svc+1){t.style.strokeDashoffset='0';t.style.transition='stroke-dashoffset 0.9s linear';}
-        else{t.style.strokeDashoffset='300';t.style.transition='none';}
-      });
-      mbLabel.textContent=n.dataset.label;
-      mbLabel.style.opacity='0.8';
-      document.querySelectorAll('.svc-card').forEach(c=>c.classList.remove('selected'));
-      const card=document.getElementById('svc'+svc);
-      if(card)card.classList.add('selected');
-    });
-    n.addEventListener('mouseleave',()=>{
-      activeTrArr.forEach(t=>{t.style.strokeDashoffset='300';t.style.transition='stroke-dashoffset 0.4s linear';});
-      setTimeout(()=>{activeTrGroup.style.opacity='0';},500);
-      mbLabel.style.opacity='0';
-      document.querySelectorAll('.svc-card').forEach(c=>c.classList.remove('selected'));
-    });
-    n.addEventListener('click',()=>{
-      const svc=parseInt(n.dataset.service);
-      const card=document.getElementById('svc'+svc);
-      if(card)card.scrollIntoView({behavior:'smooth',block:'center'});
+  document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+      e.preventDefault();
+      const target = document.querySelector(this.getAttribute('href'));
+      if (target) target.scrollIntoView({ behavior: 'smooth' });
     });
   });
-
-  /* LOG */
-  const logData=[
-    {t:'09:14:22',e:'DEVICE CONNECTED — MacBook Pro 16" (M3 Pro)',b:'PASS',bc:'badge-pass'},
-    {t:'09:14:24',e:'HARDWARE INTEGRITY CHECK — ALL SUBSYSTEMS',b:'PASS',bc:'badge-pass'},
-    {t:'09:14:31',e:'LOGIC BOARD LAYER SCAN — 128 POINTS MAPPED',b:'PASS',bc:'badge-pass'},
-    {t:'09:14:38',e:'THERMAL PROFILE — JUNCTION TEMP 47°C NOMINAL',b:'PASS',bc:'badge-pass'},
-    {t:'09:14:44',e:'NAND CONTROLLER — SECTOR 0x3A ANOMALY DETECTED',b:'ANALYZING',bc:'badge-warn'},
-    {t:'09:14:51',e:'REPAIR PROTOCOL INITIALIZED — COMPONENT ISO',b:'ACTIVE',bc:'badge-active'},
-    {t:'09:14:57',e:'QUALITY ASSURANCE CYCLE — AWAITING COMPLETION',b:'PENDING',bc:'badge-pending'},
-  ];
-  const logBody=document.getElementById('log-body');
-  logData.forEach((l,i)=>{
-    const row=document.createElement('div');
-    row.className='log-line';
-    row.style.animationDelay=(0.1+i*0.28)+'s';
-    row.innerHTML=`<span class="log-time">${l.t}</span><span class="log-event">${l.e}${i===logData.length-1?'<span class="cursor-blink"></span>':''}</span><span class="log-badge ${l.bc}">${l.b}</span>`;
-    logBody.appendChild(row);
-  });
-
-  /* LIVE METRICS */
-  let cpuBase=34,memBase=61,thermBase=47;
-  setInterval(()=>{
-    const cd=Math.max(10,Math.min(90,Math.round(cpuBase+(Math.random()*12-6))));
-    const md=Math.max(40,Math.min(85,Math.round(memBase+(Math.random()*6-3))));
-    const td=Math.max(40,Math.min(70,Math.round(thermBase+(Math.random()*4-2))));
-    document.getElementById('mb-cpu').style.width=cd+'%';
-    document.getElementById('mb-mem').style.width=md+'%';
-    document.getElementById('mb-therm').style.width=td+'%';
-    document.getElementById('mv-cpu').textContent=cd+'%';
-    document.getElementById('mv-mem').textContent=md+'%';
-    document.getElementById('mv-therm').textContent=td+'°C';
-  },2200);
-
-  /* TRIAGE */
-  const triageSel={device:null,symptom:null,onset:null};
-  let triageStep=0;
-  function handleOpt(btn,step,field){
-    btn.closest('.triage-opts').querySelectorAll('.triage-opt').forEach(b=>b.classList.remove('chosen'));
-    btn.classList.add('chosen');
-    triageSel[field]=btn.dataset.val;
-    document.getElementById('tp'+step).classList.add('done');
-    setTimeout(()=>{
-      document.getElementById('ts'+step).classList.remove('active');
-      triageStep=step+1;
-      if(triageStep<3){
-        document.getElementById('ts'+triageStep).classList.add('active');
-      } else {
-        showResult();
-      }
-    },320);
-  }
-  document.querySelectorAll('#to0 .triage-opt').forEach(b=>b.addEventListener('click',()=>handleOpt(b,0,'device')));
-  document.querySelectorAll('#to1 .triage-opt').forEach(b=>b.addEventListener('click',()=>handleOpt(b,1,'symptom')));
-  document.querySelectorAll('#to2 .triage-opt').forEach(b=>b.addEventListener('click',()=>handleOpt(b,2,'onset')));
-  function showResult(){
-    const s=triageSel.symptom;
-    let diag='Component Evaluation Required',path='Book a full diagnostic for precise fault isolation and a recommended repair pathway.';
-    if(s&&s.includes('No power')){diag='Logic Board / Power Rail Fault';path='Likely cause: failed MOSFET, shorted power rail, or damaged charging IC. Recommend logic board diagnostic and micro-soldering assessment.';}
-    else if(s&&s.includes('Screen')){diag='Display Assembly Fault';path='Screen replacement or flex cable inspection required. OEM-grade panels available for same-day turnaround.';}
-    else if(s&&s.includes('Water')){diag='Liquid Ingress Protocol';path='Immediate corrosion neutralisation and board ultrasonic cleaning recommended. Success rate highest within 48 hours of exposure.';}
-    else if(s&&s.includes('Slow')){diag='Thermal / Storage Degradation';path='Thermal compound replacement and storage health assessment recommended. Performance restoration typically within 24 hours.';}
-    else if(s&&s.includes('Data')){diag='Storage Fault — Data Recovery';path='NAND controller or SSD health issue. Specialist data recovery procedure. Success rate 94% for non-physically damaged drives.';}
-    document.getElementById('result-diag').textContent=diag;
-    document.getElementById('result-path').textContent=path;
-    document.getElementById('triage-result').classList.add('show');
-  }
-  window.resetTriage=function(){
-    triageStep=0;triageSel.device=null;triageSel.symptom=null;triageSel.onset=null;
-    [0,1,2].forEach(i=>{
-      const s=document.getElementById('ts'+i);s.classList.remove('active');
-      const p=document.getElementById('tp'+i);if(p)p.classList.remove('done');
-      s.querySelectorAll('.triage-opt').forEach(b=>b.classList.remove('chosen'));
-    });
-    document.getElementById('ts0').classList.add('active');
-    document.getElementById('tp0').classList.add('done');
-    document.getElementById('triage-result').classList.remove('show');
-  };
-
-  /* SCROLL RAIL */
-  const sections=[
-    {id:'hero',stage:0},{id:'services',stage:1},{id:'diagnostics',stage:2},
-    {id:'triage',stage:3},{id:'protocol',stage:4},{id:'booking',stage:5}
-  ];
-  const railStages=document.querySelectorAll('.rail-stage');
-  const obs=new IntersectionObserver(entries=>{
-    entries.forEach(en=>{
-      if(en.isIntersecting){
-        const sec=sections.find(s=>s.id===en.target.id);
-        if(sec){
-          railStages.forEach((rs,i)=>{
-            rs.classList.remove('active','done');
-            if(i<sec.stage)rs.classList.add('done');
-          });
-          railStages[sec.stage].classList.add('active');
-        }
-      }
-    });
-  },{threshold:0.35});
-  sections.forEach(s=>{const el=document.getElementById(s.id);if(el)obs.observe(el);});
-})();
 </script>
+
 </body>
 </html>
